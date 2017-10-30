@@ -11,32 +11,49 @@
 
 #define MROWS 1024
 #define MCOLS 1024
-#define VERBOSE 0
+#define VERBOSE 1
 
+/*  Utility Functions
+ *  basic utility functions
+ */
+ double max(double a, double b);
 
 /*  GRID Functions
-    to create, initialize, free, display the temperature grid
+ *  to create, initialize, free, display the temperature grid
  */
 double **createGrid(int m, int n);
 double **initGridSerial(int m, int n, double l, double r, double u, double d);
 double **freeGrid(double **grid, int m, int n);
 void   displayGrid(double **grid, int m, int n);
 
+/*  Gaus-Seidel Serial Functions
+    Run Gauss-Seidel method serially
+ */
+double gaussSeidelSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime);
+double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations);
+
 int main() {
-  /*  tgrid = temperature grid
-   *  m     = number of rows
-   *  n     = number of cols
-   *  eps   = error tolerance
-   *  l     = left temperature
-   *  r     = right temperature
-   *  u     = up temperature
-   *  d     = down temperature
+  /*  tgrid      = temperature grid
+   *  m          = number of rows
+   *  n          = number of cols
+   *  eps        = error tolerance (square root error)
+   *  l          = left temperature
+   *  r          = right temperature
+   *  u          = up temperature
+   *  d          = down temperature
+   *  err        = output error
+   *  iterations = number of iterations taken to compute
+   *  wtime      = wall clock time
    */
-  int m = 3, n = 6;
-  double eps = 0.01;
+
+  int m = 15, n = 15;
+  double eps = 0.0000000000001;
   double l = 1, r = 2, u = 3, d = 4;
   double **tgrid;
-
+  double err;
+  int iterations;
+  int maxIterations = 1000;
+  double wtime;
   if(VERBOSE)
     printf("Hello World!\n");
 
@@ -66,6 +83,10 @@ int main() {
   //Do whatever you want
 
   displayGrid(tgrid, m, n);
+  err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+  if(VERBOSE)
+    printf("Error is %lf in %d iterations\n", err, iterations);
+  displayGrid(tgrid, m, n);
 
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
@@ -73,6 +94,17 @@ int main() {
     printf("grid freed\n");
   return(0);
 }
+
+/*  Utility Functions
+ *  basic utility functions
+ */
+ double max(double a, double b) {
+  if(a>b)
+    return a;
+  else
+    return b;
+
+ }
 
 /*  GRID Functions
     to create, initialize, free, display the temperature grid
@@ -132,4 +164,32 @@ void displayGrid(double **grid, int m, int n) {
       printf("%lf ", grid[j][i]);
     printf("\n");
   }
+}
+
+
+double gaussSeidelSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
+  double err;
+  *iterations = 0;
+  err = gaussSeidelSerialIterations(grid, m, n, eps, iterations, maxIterations);
+  return(err);
+}
+
+double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations) {
+  int i,j;
+  double newVal;
+  double error = 10*eps;
+
+  while(error>eps && *iterations<maxIterations) {
+    error = 0;
+    for(j=1; j<m-1; j++) {
+      for(i=1; i<n-1; i++) {
+        newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
+        error = max(error, fabs(newVal - grid[j][i]));
+        grid[j][i] = newVal;
+      }
+    }
+    *iterations = *iterations+1;
+  }
+
+  return(error);
 }
