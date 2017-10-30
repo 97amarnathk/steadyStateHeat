@@ -9,13 +9,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MROWS 8192
-#define MCOLS 8192
+#define MROWS 1024
+#define MCOLS 1024
 #define VERBOSE 0
 
 
-/*GRID Functions
-  to create, initialize, free, display the temperature grid
+/*  GRID Functions
+    to create, initialize, free, display the temperature grid
  */
 double **createGrid(int m, int n);
 double **initGridSerial(int m, int n, double l, double r, double u, double d);
@@ -32,7 +32,7 @@ int main() {
    *  u     = up temperature
    *  d     = down temperature
    */
-  int m = 10, n = 5;
+  int m = 3, n = 6;
   double eps = 0.01;
   double l = 1, r = 2, u = 3, d = 4;
   double **tgrid;
@@ -74,6 +74,9 @@ int main() {
   return(0);
 }
 
+/*  GRID Functions
+    to create, initialize, free, display the temperature grid
+ */
 double **createGrid(int m, int n) {
   double **grid;
   int i;
