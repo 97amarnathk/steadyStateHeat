@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 
 #define MROWS 1024
 #define MCOLS 1024
@@ -82,11 +83,9 @@ int main() {
 
   //Do whatever you want
 
-  displayGrid(tgrid, m, n);
   err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
   if(VERBOSE)
-    printf("Error is %lf in %d iterations\n", err, iterations);
-  displayGrid(tgrid, m, n);
+    printf("Error: %lf    Iterations: %d    Time:%lf\n", err, iterations, wtime);
 
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
@@ -166,11 +165,15 @@ void displayGrid(double **grid, int m, int n) {
   }
 }
 
-
+/*  Gaus-Seidel Serial Functions
+    Run Gauss-Seidel method serially
+ */
 double gaussSeidelSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
   double err;
   *iterations = 0;
+  *wtime = omp_get_wtime()
   err = gaussSeidelSerialIterations(grid, m, n, eps, iterations, maxIterations);
+  *wtime = omp_get_wtime() - *wtime;
   return(err);
 }
 
