@@ -47,13 +47,13 @@ int main() {
    *  wtime      = wall clock time
    */
 
-  int m = 15, n = 15;
-  double eps = 0.0000000000001;
-  double l = 1, r = 2, u = 3, d = 4;
+  int m = 256, n = 256;
+  double eps = 0.001;
+  double l = 100, r = 100, u = 100, d = 0;
   double **tgrid;
   double err;
   int iterations;
-  int maxIterations = 1000;
+  int maxIterations = 100000;
   double wtime;
   if(VERBOSE)
     printf("Hello World!\n");
@@ -84,8 +84,10 @@ int main() {
   //Do whatever you want
 
   err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
-  if(VERBOSE)
-    printf("Error: %lf    Iterations: %d    Time:%lf\n", err, iterations, wtime);
+  if(VERBOSE) {
+    printf("m n error iterations time\n");
+    printf("%d %d %lf %d %lf\n", m, n, err, iterations, wtime);
+  }
 
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
@@ -171,7 +173,7 @@ void displayGrid(double **grid, int m, int n) {
 double gaussSeidelSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
   double err;
   *iterations = 0;
-  *wtime = omp_get_wtime()
+  *wtime = omp_get_wtime();
   err = gaussSeidelSerialIterations(grid, m, n, eps, iterations, maxIterations);
   *wtime = omp_get_wtime() - *wtime;
   return(err);
