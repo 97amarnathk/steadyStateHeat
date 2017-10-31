@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <omp.h>
 
 #define MROWS 1024
@@ -60,18 +61,32 @@ int main(int argc, char*argv[]) {
   int iterations;
   int maxIterations = 100000;
   double wtime;
+
+  //method chosen
+  int gss = 0;
+  int rbs = 0;
+
   if(VERBOSE)
     printf("Hello World!\n");
 
   //Parse command line arguments
-  if(argc!=3) {
+  if(argc!=4) {
     printf("Provide m and n from Command Line\n");
     return(0);
   }
-  if(argc==3) {
+  if(argc==4) {
     m = atoi(argv[1]);
     n = atoi(argv[2]);
+    if(strcmp(argv[3], "gss")==0)
+      gss = 1;
+    else if(strcmp(argv[3], "rbs")==0)
+      rbs = 1;
+    else {
+      printf("Incorrect method chosen\n");
+      return(0);
+    }
   }
+
   //Check limits
   if(m>MROWS || m<=0) {
     printf("m should be between 0 and %d\n", MROWS);
@@ -97,10 +112,14 @@ int main(int argc, char*argv[]) {
 
   //Do whatever you want
   displayGrid(tgrid, m, n);
-  err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+
+  if(gss == 1)
+    err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+  else if(rbs == 1)
+    err = gaussSeidelRBSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
   if(VERBOSE) {
-    printf("m n error iterations time\n");
-    printf("%d %d %lf %d %lf\n", m, n, err, iterations, wtime);
+    printf("method m n error iterations time\n");
+    printf("%s %d %d %lf %d %lf\n", argv[3], m, n, err, iterations, wtime);
   }
   displayGrid(tgrid, m, n);
   //Free the grid
