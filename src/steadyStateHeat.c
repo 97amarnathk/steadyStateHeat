@@ -1,5 +1,5 @@
 /*
-  ===============================================================HELLO WORLD===
+  =============================================================================
   Name        :   steadyStateHeat.c
   Authors     :   Chahak Mehta, Amarnath Karthi
   Description :   Solve the 2D Heat Equation to get the steady state temperature
