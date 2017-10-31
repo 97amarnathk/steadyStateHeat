@@ -71,6 +71,7 @@ int main(int argc, char*argv[]) {
   //method chosen
   int gss = 0;
   int rbs = 0;
+  int rbp = 0;
 
   if(VERBOSE)
     printf("Hello World!\n");
@@ -87,6 +88,8 @@ int main(int argc, char*argv[]) {
       gss = 1;
     else if(strcmp(argv[3], "rbs")==0)
       rbs = 1;
+    else if(strcmp(argv[3], "rbp")==0)
+      rbp = 1;
     else {
       printf("Incorrect method chosen\n");
       return(0);
@@ -118,15 +121,18 @@ int main(int argc, char*argv[]) {
 
   //Do whatever you want
 
+  displayGrid(tgrid, m, n);
   if(gss == 1)
     err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
   else if(rbs == 1)
     err = gaussSeidelRBSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+  else if(rbp == 1)
+    err = gaussSeidelRBParallel(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
   if(VERBOSE) {
     printf("method m n error iterations time\n");
     printf("%s %d %d %lf %d %lf\n", argv[3], m, n, err, iterations, wtime);
   }
-
+  displayGrid(tgrid, m, n);
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
   if(VERBOSE)
@@ -295,34 +301,40 @@ double gaussSeidelRBParallel(double **grid, int m, int n, double eps, int *itera
 }
 
 double gaussSeidelRBParallelIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations) {
-  int i,j;
-  double newVal;
+  int j;
   double error = 10*eps;
-
   while(error>eps && *iterations<maxIterations) {
-    error = 0;
+    double errorR = 0;
+    double errorB = 0;
+
     //Perform Red sweep
+    #pragma omp parallel for reduction(max:errorR)
     for(j=1; j<m-1; j++) {
+      int i;
+      double newVal;
       for(i=1; i<n-1; i++)
         if((i+j)%2==0) {
           newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
-          error = max(error, fabs(newVal - grid[j][i]));
+          errorR = max(errorR, fabs(newVal - grid[j][i]));
           grid[j][i] = newVal;
         }
     }
 
     //Perform Black Sweep
+    #pragma omp parallel for reduction(max:errorB)
     for(j=1; j<m-1; j++) {
+      int i;
+      double newVal;
       for(i=1; i<n-1; i++)
         if((i+j)%2==1) {
           newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
-          error = max(error, fabs(newVal - grid[j][i]));
+          errorB = max(errorB, fabs(newVal - grid[j][i]));
           grid[j][i] = newVal;
         }
     }
-
+    error = max(errorR, errorB);
     *iterations = *iterations+1;
   }
-  
+
   return(error);
 }
