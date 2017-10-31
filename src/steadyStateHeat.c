@@ -37,7 +37,7 @@ double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int 
     Run Gauss-Seidel method serially
  */
 double gaussSeidelRBSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime);
-double gaussSeidelRBSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations)
+double gaussSeidelRBSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations);
 
 int main(int argc, char*argv[]) {
   /*  tgrid      = temperature grid
