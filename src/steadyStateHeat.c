@@ -111,7 +111,6 @@ int main(int argc, char*argv[]) {
     printf("tgrid initialized sucessfully\n");
 
   //Do whatever you want
-  displayGrid(tgrid, m, n);
 
   if(gss == 1)
     err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
@@ -121,7 +120,7 @@ int main(int argc, char*argv[]) {
     printf("method m n error iterations time\n");
     printf("%s %d %d %lf %d %lf\n", argv[3], m, n, err, iterations, wtime);
   }
-  displayGrid(tgrid, m, n);
+
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
   if(VERBOSE)
