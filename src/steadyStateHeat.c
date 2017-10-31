@@ -33,7 +33,7 @@ void   displayGrid(double **grid, int m, int n);
 double gaussSeidelSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime);
 double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations);
 
-int main() {
+int main(int argc, char*argv[]) {
   /*  tgrid      = temperature grid
    *  m          = number of rows
    *  n          = number of cols
@@ -46,8 +46,7 @@ int main() {
    *  iterations = number of iterations taken to compute
    *  wtime      = wall clock time
    */
-
-  int m = 256, n = 256;
+  int m, n;
   double eps = 0.001;
   double l = 100, r = 100, u = 100, d = 0;
   double **tgrid;
@@ -58,6 +57,15 @@ int main() {
   if(VERBOSE)
     printf("Hello World!\n");
 
+  //Parse command line arguments
+  if(argc!=3) {
+    printf("Provide m and n from Command Line");
+    return(0);
+  }
+  if(argc==3) {
+    m = atoi(argv[1]);
+    n = atoi(argv[2]);
+  }
   //Check limits
   if(m>MROWS || m<=0) {
     printf("m should be between 0 and %d\n", MROWS);
