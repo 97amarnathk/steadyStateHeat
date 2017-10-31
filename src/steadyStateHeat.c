@@ -40,6 +40,12 @@ double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int 
 double gaussSeidelRBSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime);
 double gaussSeidelRBSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations);
 
+/*  Red Black Gaus-Seidel Parallel Functions
+    Run Gauss-Seidel method parallely
+ */
+double gaussSeidelRBParallel(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime);
+double gaussSeidelRBParallelIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations);
+
 int main(int argc, char*argv[]) {
   /*  tgrid      = temperature grid
    *  m          = number of rows
@@ -234,45 +240,89 @@ double gaussSeidelSerialIterations(double **grid, int m, int n, double eps, int 
 /*  Red Black Gaus-Seidel Serial Functions
     Run Gauss-Seidel method serially
  */
- double gaussSeidelRBSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
-   double err;
-   *iterations = 0;
-   *wtime = omp_get_wtime();
-   err = gaussSeidelRBSerialIterations(grid, m, n, eps, iterations, maxIterations);
-   *wtime = omp_get_wtime() - *wtime;
-   return(err);
- }
+double gaussSeidelRBSerial(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
+  double err;
+  *iterations = 0;
+  *wtime = omp_get_wtime();
+  err = gaussSeidelRBSerialIterations(grid, m, n, eps, iterations, maxIterations);
+  *wtime = omp_get_wtime() - *wtime;
+  return(err);
+}
 
- double gaussSeidelRBSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations) {
-   int i,j;
-   double newVal;
-   double error = 10*eps;
+double gaussSeidelRBSerialIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations) {
+  int i,j;
+  double newVal;
+  double error = 10*eps;
 
-   while(error>eps && *iterations<maxIterations) {
-     error = 0;
+  while(error>eps && *iterations<maxIterations) {
+    error = 0;
+    //Perform Red sweep
+    for(j=1; j<m-1; j++) {
+      for(i=1; i<n-1; i++)
+        if((i+j)%2==0) {
+          newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
+          error = max(error, fabs(newVal - grid[j][i]));
+          grid[j][i] = newVal;
+        }
+    }
 
-     //Perform Red sweep
-     for(j=1; j<m-1; j++) {
-       for(i=1; i<n-1; i++)
-         if((i+j)%2==0) {
-           newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
-           error = max(error, fabs(newVal - grid[j][i]));
-           grid[j][i] = newVal;
-         }
-     }
+    //Perform Black Sweep
+    for(j=1; j<m-1; j++) {
+      for(i=1; i<n-1; i++)
+        if((i+j)%2==1) {
+          newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
+          error = max(error, fabs(newVal - grid[j][i]));
+          grid[j][i] = newVal;
+        }
+    }
 
-     //Perform Black Sweep
-     for(j=1; j<m-1; j++) {
-       for(i=1; i<n-1; i++)
-         if((i+j)%2==1) {
-           newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
-           error = max(error, fabs(newVal - grid[j][i]));
-           grid[j][i] = newVal;
-         }
-     }
+    *iterations = *iterations+1;
+  }
 
-     *iterations = *iterations+1;
-   }
+  return(error);
+}
 
-   return(error);
- }
+/*  Red Black Gaus-Seidel Parallel Functions
+    Run Gauss-Seidel method parallely
+*/
+double gaussSeidelRBParallel(double **grid, int m, int n, double eps, int *iterations, int maxIterations, double *wtime) {
+  double err;
+  *iterations = 0;
+  *wtime = omp_get_wtime();
+  err = gaussSeidelRBParallelIterations(grid, m, n, eps, iterations, maxIterations);
+  *wtime = omp_get_wtime() - *wtime;
+  return(err);
+}
+
+double gaussSeidelRBParallelIterations(double **grid, int m, int n, double eps, int *iterations, int maxIterations) {
+  int i,j;
+  double newVal;
+  double error = 10*eps;
+
+  while(error>eps && *iterations<maxIterations) {
+    error = 0;
+    //Perform Red sweep
+    for(j=1; j<m-1; j++) {
+      for(i=1; i<n-1; i++)
+        if((i+j)%2==0) {
+          newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
+          error = max(error, fabs(newVal - grid[j][i]));
+          grid[j][i] = newVal;
+        }
+    }
+
+    //Perform Black Sweep
+    for(j=1; j<m-1; j++) {
+      for(i=1; i<n-1; i++)
+        if((i+j)%2==1) {
+          newVal = 0.25*(grid[j-1][i]+grid[j+1][i]+grid[j][i-1]+grid[j][i+1]);
+          error = max(error, fabs(newVal - grid[j][i]));
+          grid[j][i] = newVal;
+        }
+    }
+
+    *iterations = *iterations+1;
+  }
+  
+  return(error);
+}
