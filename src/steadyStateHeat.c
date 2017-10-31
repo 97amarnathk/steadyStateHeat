@@ -120,8 +120,6 @@ int main(int argc, char*argv[]) {
     printf("tgrid initialized sucessfully\n");
 
   //Do whatever you want
-
-  displayGrid(tgrid, m, n);
   if(gss == 1)
     err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
   else if(rbs == 1)
