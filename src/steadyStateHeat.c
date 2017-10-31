@@ -59,7 +59,7 @@ int main(int argc, char*argv[]) {
 
   //Parse command line arguments
   if(argc!=3) {
-    printf("Provide m and n from Command Line");
+    printf("Provide m and n from Command Line\n");
     return(0);
   }
   if(argc==3) {
