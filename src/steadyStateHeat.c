@@ -78,7 +78,7 @@ int main(int argc, char*argv[]) {
 
   //Parse command line arguments
   if(argc!=4) {
-    printf("Provide m and n from Command Line\n");
+    printf("Provide m, n, method from Command Line\n");
     return(0);
   }
   if(argc==4) {
@@ -130,7 +130,6 @@ int main(int argc, char*argv[]) {
     printf("method m n error iterations time\n");
     printf("%s %d %d %lf %d %lf\n", argv[3], m, n, err, iterations, wtime);
   }
-  displayGrid(tgrid, m, n);
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
   if(VERBOSE)
