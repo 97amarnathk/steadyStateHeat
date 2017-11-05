@@ -23,12 +23,12 @@ for i in range(1, RUNS+1):
 for i in range(1, RUNS+1):
     print "Run ", i, " -------"
     for s in sizes:
-        subprocess.call("./test "+str(s)+" "+str(s)+" gss"+ " 1 >> run"+str(i)+".csv", shell=true)
+        subprocess.call("./test "+str(s)+" "+str(s)+" gss"+ " 1 >> run"+str(i)+".csv", shell=True)
         print "gss", s
     for s in sizes:
-        subprocess.call("./test "+str(s)+" "+str(s)+" rbs"+ " 1 >> run"+str(i)+".csv", shell=true)
+        subprocess.call("./test "+str(s)+" "+str(s)+" rbs"+ " 1 >> run"+str(i)+".csv", shell=True)
         print "rbs", s
     for s in sizes:
         for c in range(1, CORES+1):
-            subprocess.call("./test "+str(s)+" "+str(s)+" rbp "+ str(c)+ " >> run"+str(i)+".csv", shell=true)
+            subprocess.call("./test "+str(s)+" "+str(s)+" rbp "+ str(c)+ " >> run"+str(i)+".csv", shell=True)
             print "gss", s, c
