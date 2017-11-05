@@ -2,7 +2,7 @@ import subprocess
 import os
 
 CORES = 12
-RUNS = 10
+RUNS = 5
 
 sizes = [64, 128, 256, 512, 1024]
 csvStructure = "method,p,m,n,error,iterations,algtime,e2e"
