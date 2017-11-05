@@ -25,7 +25,7 @@
  */
 double **createGrid(int m, int n);
 double **initGridSerial(int m, int n, double l, double r, double u, double d);
-double **initGridParallel(int m, int n, double l, double r, double u, double d)
+double **initGridParallel(int m, int n, double l, double r, double u, double d);
 double **freeGrid(double **grid, int m, int n);
 void   displayGrid(double **grid, int m, int n);
 
