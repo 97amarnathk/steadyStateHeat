@@ -1,8 +1,8 @@
 /*
   =============================================================================
-  Name        :   steadyStateHeat.c
+  Name        :   steadyStateHeat_Test.c
   Authors     :   Chahak Mehta, Amarnath Karthi
-  Description :   Solve the 2D Heat Equation to get the steady state temperature
+  Description :   File for parallel benchmarking.
   =============================================================================
  */
 #include <stdio.h>
@@ -13,7 +13,6 @@
 
 #define MROWS 1024
 #define MCOLS 1024
-#define VERBOSE 1
 
 /*  Utility Functions
  *  basic utility functions
@@ -74,9 +73,6 @@ int main(int argc, char*argv[]) {
   int rbs = 0;
   int rbp = 0;
 
-  if(VERBOSE)
-    printf("Hello World!\n");
-
   //Parse command line arguments
   if(argc!=5) {
     printf("Provide m, n, method, p from Command Line\n");
@@ -129,8 +125,6 @@ int main(int argc, char*argv[]) {
     printf("tgrid could not be initialized\n");
     return(0);
   }
-  if(VERBOSE)
-    printf("tgrid initialized sucessfully\n");
 
   //Do whatever you want
   if(gss == 1)
@@ -143,15 +137,11 @@ int main(int argc, char*argv[]) {
   //end e2etime
   e2etime = omp_get_wtime() - e2etime;
 
-  if(VERBOSE) {
-    printf("method,p,m,n,error,iterations,algtime,e2e\n");
-    printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], p, m, n, err, iterations, algtime, e2etime);
-  }
+  //method,p,m,n,error,iterations,algtime,e2e
+  printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], omp_get_num_threads(), m, n, err, iterations, algtime, e2etime);
 
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
-  if(VERBOSE)
-    printf("grid freed\n");
 
   return(0);
 }
