@@ -138,7 +138,7 @@ int main(int argc, char*argv[]) {
   e2etime = omp_get_wtime() - e2etime;
 
   //method,p,m,n,error,iterations,algtime,e2e
-  printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], omp_get_num_threads(), m, n, err, iterations, algtime, e2etime);
+  printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], omp_get_max_threads(), m, n, err, iterations, algtime, e2etime);
 
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
