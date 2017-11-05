@@ -226,11 +226,11 @@ double **initGridParallel(int m, int n, double l, double r, double u, double d) 
 
   //Initialize inner values with mean of the boundary
   double mean = (((double)l+r)*(m-2) + ((double)u+d)*(n))/(2*n+2*m-4);
-  #pragma omp parallel for
-  for(j=1; j<m-1; j++)
+  #pragma omp parallel for private(i)
+  for(j=1; j<m-1; j++) {
     for(i=1; i<n-1; i++)
       grid[j][i]=mean;
-
+  }
   return grid;
 }
 
