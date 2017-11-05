@@ -59,15 +59,14 @@ int main(int argc, char*argv[]) {
    *  iterations = number of iterations taken to compute
    *  wtime      = wall clock time
    */
-  int m, n;
+  int m, n, p;
   double eps = 0.001;
   double l = 100, r = 100, u = 100, d = 0;
   double **tgrid;
   double err;
   int iterations;
   int maxIterations = 100000;
-  double wtime;
-
+  double algtime, e2etime;
   //method chosen
   int gss = 0;
   int rbs = 0;
@@ -77,13 +76,14 @@ int main(int argc, char*argv[]) {
     printf("Hello World!\n");
 
   //Parse command line arguments
-  if(argc!=4) {
-    printf("Provide m, n, method from Command Line\n");
+  if(argc!=5) {
+    printf("Provide m, n, method, p from Command Line\n");
     return(0);
   }
-  if(argc==4) {
+  else {
     m = atoi(argv[1]);
     n = atoi(argv[2]);
+    p = atoi(argv[4]);
     if(strcmp(argv[3], "gss")==0)
       gss = 1;
     else if(strcmp(argv[3], "rbs")==0)
@@ -110,8 +110,19 @@ int main(int argc, char*argv[]) {
     return(0);
   }
 
+  //set number of threads
+  if(rbp==1)
+    omp_set_num_threads(p);
+
+  //strt e2e time
+  e2etime = omp_get_wtime();
+
   //Create and initialize Temperature Grid
-  tgrid = initGridSerial(m, n, l, r, u, d);
+  if(gss==1 || rbs==1)
+    tgrid = initGridSerial(m, n, l, r, u, d);
+  else
+    tgrid = initGridParallel(m, n, l, r, u, d);
+
   if(tgrid == NULL) {
     printf("tgrid could not be initialized\n");
     return(0);
@@ -121,15 +132,20 @@ int main(int argc, char*argv[]) {
 
   //Do whatever you want
   if(gss == 1)
-    err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+    err = gaussSeidelSerial(tgrid, m, n, eps, &iterations, maxIterations, &algtime);
   else if(rbs == 1)
-    err = gaussSeidelRBSerial(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+    err = gaussSeidelRBSerial(tgrid, m, n, eps, &iterations, maxIterations, &algtime);
   else if(rbp == 1)
-    err = gaussSeidelRBParallel(tgrid, m, n, eps, &iterations, maxIterations, &wtime);
+    err = gaussSeidelRBParallel(tgrid, m, n, eps, &iterations, maxIterations, &algtime);
+
+  //end e2etime
+  e2etime = omp_get_wtime() - e2etime;
+  
   if(VERBOSE) {
-    printf("method m n error iterations time\n");
-    printf("%s %d %d %lf %d %lf\n", argv[3], m, n, err, iterations, wtime);
+    printf("method,p,m,n,error,iterations,algtime,e2e\n");
+    printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], p, m, n, err, iterations, algtime, e2etime);
   }
+
   //Free the grid
   tgrid = freeGrid(tgrid, m, n);
   if(VERBOSE)
@@ -145,7 +161,6 @@ int main(int argc, char*argv[]) {
     return a;
   else
     return b;
-
  }
 
 /*  GRID Functions
@@ -181,6 +196,36 @@ double **initGridSerial(int m, int n, double l, double r, double u, double d) {
 
   //Initialize inner values with mean of the boundary
   double mean = (((double)l+r)*(m-2) + ((double)u+d)*(n))/(2*n+2*m-4);
+
+  for(j=1; j<m-1; j++)
+    for(i=1; i<n-1; i++)
+      grid[j][i]=mean;
+
+  return grid;
+}
+
+double **initGridParallel(int m, int n, double l, double r, double u, double d) {
+  double **grid;
+  grid = createGrid(m, n);
+  int i,j;
+
+  //If not created return NULL
+  if(grid == NULL)
+    return(NULL);
+
+  //Initialize the boundary
+  for(i=0; i<n;i++) {
+    grid[0][i] = d;
+    grid[m-1][i] = u;
+  }
+  for(j=1; j<m-1; j++) {
+    grid[j][0] = l;
+    grid[j][n-1] = r;
+  }
+
+  //Initialize inner values with mean of the boundary
+  double mean = (((double)l+r)*(m-2) + ((double)u+d)*(n))/(2*n+2*m-4);
+  #pragma omp parallel for
   for(j=1; j<m-1; j++)
     for(i=1; i<n-1; i++)
       grid[j][i]=mean;
