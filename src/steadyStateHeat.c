@@ -25,6 +25,7 @@
  */
 double **createGrid(int m, int n);
 double **initGridSerial(int m, int n, double l, double r, double u, double d);
+double **initGridParallel(int m, int n, double l, double r, double u, double d)
 double **freeGrid(double **grid, int m, int n);
 void   displayGrid(double **grid, int m, int n);
 
@@ -140,7 +141,7 @@ int main(int argc, char*argv[]) {
 
   //end e2etime
   e2etime = omp_get_wtime() - e2etime;
-  
+
   if(VERBOSE) {
     printf("method,p,m,n,error,iterations,algtime,e2e\n");
     printf("%s,%d,%d,%d,%lf,%d,%lf,%lf\n", argv[3], p, m, n, err, iterations, algtime, e2etime);
