@@ -32,7 +32,33 @@ The serial algorithms is quite simple. To approach the final solution, each poin
 for n in range(N_ITER):
     for i in range(M):
       for j in range(N):
-        A[i][j] = average(A[i-1][j] + A[i+1][j] + A[i][j+1] + A[i][j-1])
+        A[i][j] = average(A[i-1][j] ,A[i+1][j] ,A[i][j+1] ,A[i][j-1])
+```
+
+### Parallel
+
+The main problem in parallelising this algorithm is the inherent data dependency. To apply relaxation on `A[i][j]`, we need to first relax its 4 neighbors `A[i-1][j]` ,`A[i+1][j]` ,`A[i][j+1]` ,`A[i][j-1]`. Therefore we cannot do a simple row or column based data decomposition. Instead we need to do something called **Red Black Decomposition**. (Imagine a chessboard, red and black). All red nodes depend only on black nodes, and vice versa. There is no dependence between 2 nodes of same color. Using this data decomposition we can apply the following logic:
+
+
+```
+for n in range(N_ITER):
+
+    # iterate through all black nodes parallely
+    <!--BEGIN PARALLEL REGION-->
+    for i in range(M/2):
+        for j in range(N/2):
+            m = 2*i
+            n = 2*j
+            A[m][n] = average(A[m-1][n] ,A[m+1][n] ,A[m][n+1] ,A[m][n-1])
+            
+     # iterate through all red nodes parallely
+    <!--BEGIN PARALLEL REGION-->
+    for i in range(M/2):
+        for j in range(N/2):
+            m = 2*i + 1
+            n = 2*j + 1
+            A[m][n] = average(A[m-1][n] ,A[m+1][n] ,A[m][n+1] ,A[m][n-1])
+            
 ```
 
 ## Authors
